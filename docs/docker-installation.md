@@ -266,7 +266,7 @@ docker inspect --format '{{.State.Health.Status}}' social_link_converter
 
 Le service **`link-converter`**, conteneur **`social_link_converter`**, doit être en cours d'exécution et sa santé doit devenir `healthy`. Ouvrir **http://localhost:8888**, puis vérifier que la page et le logo s'affichent. Depuis un autre appareil, utiliser `http://IP_DE_L_HOTE:8888` avec une adresse réelle et joignable, un bind approprié et les autorisations réseau nécessaires.
 
-L'adresse **`IP_DE_L_HOTE` n'est pas configurée par le projet** : elle ne peut être utilisée que si elle appartient réellement à votre hôte et si vous êtes connecté au réseau privé permettant de l'atteindre. Ce n'est pas une adresse publique par défaut. Ces commandes ne déploient rien automatiquement sur un serveur SSH.
+Ces commandes ne déploient rien automatiquement sur un serveur SSH.
 
 ## 8. Entretien et problèmes fréquents
 

@@ -97,7 +97,7 @@ docker compose ps
 
 - Depuis l'hôte : `http://localhost:8888` (adapter le port si nécessaire).
 - Depuis un autre appareil : `http://IP_DE_L_HOTE:8888`, en remplaçant `IP_DE_L_HOTE` par l'adresse réellement joignable de la machine Docker. `localhost` désigne toujours l'appareil sur lequel le navigateur tourne.
-- **`http://IP_DE_L_HOTE:8888` n'est qu'un exemple conditionnel** : il fonctionne uniquement si `IP_DE_L_HOTE` est réellement l'adresse de votre hôte et si le navigateur peut le joindre via le réseau privé concerné, par exemple un VPN. Ce n'est ni une adresse publique ni une destination configurée par défaut.
+
 - `0.0.0.0` est une adresse d'écoute, pas l'adresse à donner aux visiteurs.
 
 ## Vérifier et administrer
