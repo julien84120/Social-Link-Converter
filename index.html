@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Link Converter — Générateur de Liens Fixup</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        .brand-logo { display: block; width: 100%; max-width: 390px; height: auto; margin: 0 auto 16px; }
+        .input-label { display: block; text-align: left; margin-bottom: 8px; }
+        .link-comparison { overflow-wrap: anywhere; }
+        #copyStatus { font-size: 14px; }
+        #copyStatus:empty { display: none; }
+        button:focus-visible, input:focus-visible { outline: 2px solid #8bc4ff; outline-offset: 3px; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+        body {
+            font-family: system-ui, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 5vh 20px 20px 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative; /* Pour positionner l'erreur */
+        }
+
+        input[type="text"] { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #333; border-radius: 6px; background: #2c2c2c; color: white; font-size: 16px; transition: 0.2s;}
+        input[type="text"]:focus { border-color: #007bff; }
+        input[type="text"].input-error { border-color: #dc3545; }
+
+        .error-message { color: #dc3545; font-size: 13px; text-align: left; margin: 0 0 15px 5px; display: none; }
+
+        .options-group { text-align: left; background: #2a2a2a; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
+        .options-group label { display: flex; align-items: center; gap: 10px; margin: 8px 0; cursor: pointer; color: #ccc; transition: 0.2s; }
+        .options-group label:hover { color: #fff; }
+        .options-group input[type="checkbox"] { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+
+        .button-group { display: flex; gap: 10px; margin-bottom: 10px; }
+
+        button { color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.2s; font-weight: bold; }
+        .btn-primary { background-color: #007bff; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-success { background-color: #28a745; margin-bottom: 0; }
+        .btn-success:hover { background-color: #218838; }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 6px;
+            display: none;
+            word-break: break-all;
+        }
+
+        .slide-down { animation: slideDownAnim 0.3s ease-out forwards; }
+        @keyframes slideDownAnim {
+            0% { opacity: 0; transform: translateY(-15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        #newUrl { margin: 0 0 15px 0; color: #4da3ff; font-size: 15px; }
+
+        .info-section {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+        }
+        .info-section h3 { margin-top: 0; margin-bottom: 20px; text-align: center; color: #fff; font-size: 18px; }
+        .network-list { display: flex; flex-direction: column; gap: 12px; }
+        .network-item { background: #2a2a2a; padding: 15px; border-radius: 8px; border-left: 4px solid #555; }
+
+        .network-item.twitter { border-left-color: #1DA1F2; }
+        .network-item.instagram { border-left-color: #E1306C; }
+        .network-item.tiktok { border-left-color: #ff0050; }
+        .network-item.reddit { border-left-color: #FF4500; }
+
+        .network-name { font-weight: bold; font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; color: #fff; }
+        .network-name svg { width: 24px; height: 24px; fill: #fff; flex-shrink: 0; }
+
+        .link-comparison { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-family: monospace; color: #aaa; }
+        .link-original::before { content: '❌ Origine : '; color: #dc3545; font-family: system-ui, sans-serif; }
+        .link-converted::before { content: '✅ Converti : '; color: #28a745; font-family: system-ui, sans-serif; }
+        .link-converted { color: #4da3ff; }
+
+        footer { margin-top: auto; padding: 40px 0 10px 0; color: #666; font-size: 14px; text-align: center; }
+        @media (max-width: 480px) {
+            body { padding: 20px 12px; }
+            .container, .info-section { padding: 20px 16px; }
+            .button-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img class="brand-logo" src="assets/logo.png" alt="Social Link Converter" width="1200" height="460">
+        <h2>Convertisseur de Liens</h2>
+        <label class="input-label" for="urlInput">Lien à convertir</label>
+        <input type="text" id="urlInput" aria-describedby="errorMessage" aria-invalid="false" inputmode="url" autocomplete="url" spellcheck="false" placeholder="Collez le lien X, Insta, TikTok...">
+        <div id="errorMessage" class="error-message" role="alert">Veuillez entrer un lien web valide (http ou https, sans identifiants).</div>
+
+        <div class="options-group">
+            <label>
+                <input type="checkbox" id="removeTrackers" checked>
+                Nettoyer les traqueurs (ex: ?s=20)
+            </label>
+            <label>
+                <input type="checkbox" id="translateFr" checked>
+                Ajouter /fr pour traduction Discord (X/Twitter)
+            </label>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" id="generateBtn" onclick="convertUrl()">Générer</button>
+            <button class="btn-danger" onclick="clearFields()">Effacer</button>
+        </div>
+
+        <div id="resultBox" class="result-box">
+            <p id="newUrl" aria-live="polite" aria-atomic="true"></p>
+            <button class="btn-success" onclick="copyUrl()">Copier le lien</button>
+            <p id="copyStatus" role="status" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>Réseaux sociaux pris en charge</h3>
+        <div class="network-list">
+            <div class="network-item twitter">
+                <span class="network-name">
+                    <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    X / Twitter
+                </span>
+                <div class="link-comparison">
+                    <span class="link-original">https://x.com/elonmusk/status/123456</span>
+                    <span class="link-converted">https://fixupx.com/elonmusk/status/123456/fr</span>
+                </div>
+            </div>
+            <div class="network-item instagram">
+                <span class="network-name">
+                    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    Instagram
+                </span>
+                <div class="link-comparison">
+                    <span class="link-original">https://instagram.com/p/123456</span>
+                    <span class="link-converted">https://kirkstagram.com/p/123456</span>
+                </div>
+            </div>
+            <div class="network-item tiktok">
+                <span class="network-name">
+                    <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1.04-.1z"/></svg>
+                    TikTok
+                </span>
+                <div class="link-comparison">
+                    <span class="link-original">https://tiktok.com/@user/video/123456</span>
+                    <span class="link-converted">https://vxtiktok.com/@user/video/123456</span>
+                </div>
+            </div>
+            <div class="network-item reddit">
+                <span class="network-name">
+                    <svg viewBox="0 0 24 24"><path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.75-1.64-6.07-1.72.08-1.1.4-3.05 1.52-3.7.72-.4 1.73-.24 3 .5C17.2 6.3 18.46 7.5 20 7.5c1.65 0 3-1.35 3-3s-1.35-3-3-3c-1.38 0-2.54.94-2.88 2.22-1.43-.72-2.64-.8-3.6-.25-1.64.94-1.95 3.47-2 4.55-2.33.08-4.45.7-6.1 1.72C4.86 8.98 3.96 8.5 3 8.5c-1.65 0-3 1.35-3 3 0 1.32.84 2.44 2.05 2.84-.03.22-.05.44-.05.66 0 3.86 4.5 7 10 7s10-3.14 10-7c0-.22-.02-.44-.05-.66 1.2-.4 2.05-1.54 2.05-2.84zM2.3 11.5c0-1.1.9-2 2-2 .64 0 1.22.32 1.6.82-1.1.85-1.92 1.9-2.3 3.08-.8-.32-1.3-1.1-1.3-1.9zM20 3.8c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM12 19.2c-2.5 0-4.65-1.25-5.1-2.83-.05-.2.08-.4.28-.45.2-.05.4.08.45.28.33 1.22 2.1 2.2 4.37 2.2 2.26 0 4.04-.98 4.37-2.2.05-.2.25-.33.45-.28.2.05.33.25.28.45-.45 1.58-2.6 2.83-5.1 2.83zm-2.9-4.8c-.83 0-1.5-.67-1.5-1.5S8.27 11.4 9.1 11.4s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm5.8 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm2.8.28c-.38-1.2-1.2-2.26-2.3-3.08.38-.5.96-.82 1.6-.82 1.1 0 2 .9 2 2 0 .8-.5 1.58-1.3 1.9z"/></svg>
+                    Reddit
+                </span>
+                <div class="link-comparison">
+                    <span class="link-original">https://reddit.com/r/technology/s/123456</span>
+                    <span class="link-converted">https://vxreddit.com/r/technology/s/123456</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Copyright Julien. Tous droits réservés.
+    </footer>
+
+    <script>
+        // Ajout de l'écouteur pour la touche Entrée
+        document.getElementById("urlInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("generateBtn").click();
+            }
+        });
+
+        function convertUrl() {
+            const urlInput = document.getElementById('urlInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultBox = document.getElementById('resultBox');
+            const url = urlInput.value.trim();
+
+            urlInput.classList.remove('input-error');
+            urlInput.setAttribute('aria-invalid', 'false');
+            document.getElementById('copyStatus').innerText = '';
+            errorMessage.style.display = 'none';
+            resultBox.style.display = 'none';
+            document.getElementById('newUrl').innerText = '';
+
+            if (!url) return;
+
+            let parsed;
+            try {
+                parsed = new URL(url);
+                if (!/^https?:\/\//i.test(url) || !['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) {
+                    throw new Error('URL non prise en charge');
+                }
+            } catch {
+                urlInput.classList.add('input-error');
+                urlInput.setAttribute('aria-invalid', 'true');
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const removeTrackers = document.getElementById('removeTrackers').checked;
+            const translateFr = document.getElementById('translateFr').checked;
+            // L'option retire tous les paramètres, sans supprimer le fragment.
+            if (removeTrackers) parsed.search = '';
+            const host = parsed.hostname.replace(/^www\./, '');
+            const mappings = new Map([
+                ['x.com', 'fixupx.com'], ['twitter.com', 'fixupx.com'],
+                ['instagram.com', 'kirkstagram.com'], ['tiktok.com', 'vxtiktok.com'],
+                ['reddit.com', 'vxreddit.com']
+            ]);
+            const isTwitter = ['x.com', 'twitter.com', 'fixupx.com', 'fxtwitter.com'].includes(host);
+            if (mappings.has(host)) parsed.hostname = mappings.get(host);
+            if (isTwitter && translateFr && /^\/(?:[^/]+\/status|i\/web\/status)\/\d+\/?$/.test(parsed.pathname)) {
+                parsed.pathname = parsed.pathname.replace(/\/$/, '') + '/fr';
+            }
+
+            document.getElementById('newUrl').innerText = parsed.href;
+
+            resultBox.style.display = 'block';
+            resultBox.classList.remove('slide-down');
+            void resultBox.offsetWidth;
+            resultBox.classList.add('slide-down');
+        }
+
+        async function copyUrl() {
+            const newUrl = document.getElementById('newUrl').innerText;
+            if (!newUrl) return false;
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(newUrl);
+                    copied = true;
+                } catch {
+                    // En cas de refus, essayer la méthode compatible HTTP.
+                }
+            }
+            if (!copied) {
+                const previousFocus = document.activeElement;
+                const textArea = document.createElement('textarea');
+                textArea.value = newUrl;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                try {
+                    textArea.select();
+                    copied = document.execCommand('copy') === true;
+                } catch {
+                    copied = false;
+                } finally {
+                    document.body.removeChild(textArea);
+                    if (previousFocus) previousFocus.focus();
+                }
+            }
+            document.getElementById('copyStatus').innerText = copied
+                ? 'Lien copié dans le presse-papiers !'
+                : 'Copie impossible. Sélectionnez le lien et copiez-le manuellement.';
+            return copied;
+        }
+
+        function clearFields() {
+            const urlInput = document.getElementById('urlInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const resultBox = document.getElementById('resultBox');
+
+            urlInput.value = '';
+            document.getElementById('newUrl').innerText = '';
+            document.getElementById('copyStatus').innerText = '';
+            urlInput.setAttribute('aria-invalid', 'false');
+
+            urlInput.classList.remove('input-error');
+            errorMessage.style.display = 'none';
+
+            resultBox.classList.remove('slide-down');
+            resultBox.style.display = 'none';
+
+            urlInput.focus();
+        }
+    </script>
+</body>
+</html>

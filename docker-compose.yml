@@ -1,0 +1,14 @@
+services:
+  link-converter:
+    build: .
+    container_name: social_link_converter
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-8888}:80"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
