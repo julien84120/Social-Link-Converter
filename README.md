@@ -39,7 +39,7 @@ Sur **la machine qui hébergera l'application** :
 Depuis le dossier dans lequel créer le projet, pour une **première installation** :
 
 ```sh
-git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && docker compose up -d --build --wait
+git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && sh ./install.sh
 ```
 
 ### Windows — PowerShell 5.1 ou version ultérieure
@@ -50,7 +50,7 @@ Les gardes empêchent de poursuivre si une commande échoue ; `&&` n'est pas dis
 git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter
 if ($LASTEXITCODE -ne 0) { throw "Échec du clonage Git." }
 Set-Location social-link-converter -ErrorAction Stop
-docker compose up -d --build --wait
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 if ($LASTEXITCODE -ne 0) { throw "Échec du démarrage Docker : consulter les journaux." }
 ```
 
@@ -92,6 +92,19 @@ docker compose ps
 ```
 
 `--wait` attend que le service soit prêt selon son contrôle de santé. Le service Compose se nomme **`link-converter`** et le conteneur **`social_link_converter`**.
+
+### Liens affichés à la fin de l'installation
+
+Les scripts `install.sh` (Linux/macOS) et `install.ps1` (Windows) démarrent Docker Compose, attendent que le service soit prêt, puis affichent :
+
+- **Depuis l'hôte :** [http://localhost:8888](http://localhost:8888) avec le port réellement publié si vous l'avez personnalisé.
+- **Depuis un autre appareil du réseau :** un lien HTTP contenant l'adresse IPv4 détectée sur la machine et le port réellement publié.
+
+Les liens utilisent le format de lien terminal OSC 8 lorsque la sortie est interactive. Selon votre terminal, cliquer ou utiliser `Ctrl+clic` / `Cmd+clic` pour ouvrir le navigateur. Les URL restent affichées en texte pour pouvoir les copier si les liens ne sont pas pris en charge.
+
+L'adresse réseau dépend de l'interface principale détectée : avec plusieurs cartes réseau ou un VPN, vérifier qu'elle est joignable depuis l'autre appareil. Aucun pare-feu n'est modifié et l'accès depuis un autre appareil n'est pas testé automatiquement. Si l'IP ne peut pas être détectée, le script le signale au lieu d'inventer une adresse. Si `BIND_ADDRESS` limite l'écoute à la boucle locale, aucun accès réseau n'est annoncé. Une écoute sur une IP précise peut rendre `localhost` inaccessible ; le script le signale également.
+
+Pour un dossier déjà cloné, ou après avoir créé `.env`, lancer `sh ./install.sh` sous Linux/macOS, ou `powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1` sous Windows. L'option `Bypass` ne concerne que ce processus PowerShell ; lire le script avant de l'exécuter. La commande `docker compose up` seule reste utilisable, mais n'affiche pas ce récapitulatif personnalisé.
 
 ### Quelle adresse ouvrir ?
 

@@ -225,13 +225,13 @@ Ne pas confondre la présence du client `docker` avec un moteur actif : `docker 
 Avec Docker accessible sans `sudo` :
 
 ```sh
-git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && docker compose up -d --build --wait
+git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && sh ./install.sh
 ```
 
 Si Linux exige encore `sudo`, utiliser :
 
 ```sh
-git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && sudo docker compose up -d --build --wait
+git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter && cd social-link-converter && sudo sh ./install.sh
 ```
 
 ### Première installation sous Windows PowerShell
@@ -242,9 +242,11 @@ Compatible PowerShell 5.1 et versions ultérieures :
 git clone https://github.com/julien84120/Social-Link-Converter.git social-link-converter
 if ($LASTEXITCODE -ne 0) { throw "Échec du clonage Git." }
 Set-Location social-link-converter -ErrorAction Stop
-docker compose up -d --build --wait
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 if ($LASTEXITCODE -ne 0) { throw "Échec du lancement Docker." }
 ```
+
+Les scripts attendent que le service soit prêt, puis affichent les liens **depuis l'hôte** (`localhost`) et **depuis le réseau local** (IPv4 détectée), avec le port réellement publié. Les URL sont cliquables dans les terminaux compatibles, sinon copiables. Voir [les liens en fin d'installation](../README.md#liens-affichés-à-la-fin-de-linstallation) pour les limites de détection, les VPN et les adresses d'écoute restreintes. La politique PowerShell `Bypass` s'applique uniquement au processus lancé, sans modifier la politique globale.
 
 ### Configurer avant de démarrer
 

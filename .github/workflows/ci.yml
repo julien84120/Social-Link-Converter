@@ -19,8 +19,8 @@ jobs:
         run: npm test
       - name: Valider Docker Compose
         run: docker compose config --quiet
-      - name: Construire et démarrer
-        run: docker compose up -d --build --wait --wait-timeout 90
+      - name: Construire et démarrer avec le script d'installation
+        run: sh ./install.sh
       - name: Vérifier le serveur et le logo
         shell: bash
         run: |
