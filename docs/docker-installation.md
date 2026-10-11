@@ -289,7 +289,23 @@ docker compose restart link-converter
 docker compose down
 ```
 
-Les trois commandes d'arrêt/reprise/redémarrage sont des actions distinctes : choisir celle souhaitée. `down` retire le conteneur et le réseau du projet, pas le dépôt, `.env`, l'image locale ni les autres projets. Ne pas supprimer de volumes ou lancer de nettoyage Docker global pour cette application.
+Les trois commandes d'arrêt/reprise/redémarrage sont des actions distinctes : choisir celle souhaitée. `down` seul retire le conteneur et le réseau du projet, pas le dépôt, `.env` ni l'image locale.
+
+### Désinstallation complète
+
+**Suppression définitive :** sauvegarder les modifications à conserver. Depuis le **dossier parent** de `social-link-converter`, sur la machine Docker, sous Linux/macOS :
+
+```sh
+cd social-link-converter && docker compose down --rmi all --volumes && cd .. && rm -rf -- social-link-converter
+```
+
+Cette commande retire les ressources Compose de l'application (conteneur, réseau, image et volumes gérés par le projet), puis le dossier cloné avec `.env` et son historique Git local. Le projet fourni n'utilise aucun volume. Si Docker échoue, le dossier est conservé. Sous Linux, utiliser `sudo docker compose` si nécessaire ; adapter le nom du dossier si vous l'avez renommé.
+
+Pour **Windows PowerShell**, ainsi que les précautions concernant le nom du projet Compose, consulter la [procédure complète du README](../README.md#désinstallation-complète-de-lapplication).
+
+Docker lui-même, le dépôt GitHub, les autres projets, les volumes externes, les images de base partagées et le cache de construction sont conservés. Il ne s'agit pas d'un effacement sécurisé de toutes les traces : aucun nettoyage Docker global n'est exécuté.
+
+### Mise à jour sous PowerShell 5.1
 
 Pour la mise à jour sous **PowerShell 5.1**, utiliser les gardes suivantes, et non `&&` :
 

@@ -159,7 +159,33 @@ docker compose restart link-converter
 docker compose down
 ```
 
-`docker compose down` laisse le dépôt, `.env` et l'image locale en place, sans supprimer les autres projets Docker. C'est la désinstallation non destructive recommandée ; `docker compose up -d --build --wait` permet de recréer le service. Ne pas utiliser de nettoyage global (`docker system prune`) ni de suppression de volumes pour désinstaller cette application. Après un changement de `.env`, relancer `docker compose up -d --build --wait`, pas seulement `restart`.
+`docker compose down` laisse le dépôt, `.env` et l'image locale en place. Pour tout retirer au niveau de l'application, suivre la procédure ci-dessous. Après un changement de `.env`, relancer `docker compose up -d --build --wait`, pas seulement `restart`.
+
+### Désinstallation complète de l'application
+
+> **Attention : suppression définitive.** Sauvegarder auparavant les modifications à conserver. Ces commandes suppriment le conteneur, son réseau Compose, l'image de l'application, les volumes gérés par ce projet et le dossier cloné complet, y compris `.env` et son historique Git local. Le projet fourni ne crée aucun volume. Les volumes externes et les dossiers montés depuis l'extérieur ne sont pas supprimés.
+
+Exécuter sur **la machine Docker**, depuis le **dossier parent** de `social-link-converter` (et non depuis le dossier du projet). Les commandes supposent le nom utilisé par l'installation rapide ; adapter ce nom si le dossier a été renommé. Docker doit être démarré.
+
+**Linux / macOS — en une commande :**
+
+```sh
+cd social-link-converter && docker compose down --rmi all --volumes && cd .. && rm -rf -- social-link-converter
+```
+
+Si Docker nécessite les droits administrateur sous Linux, remplacer uniquement `docker compose` par `sudo docker compose`. Les `&&` empêchent la suppression du dossier si l'arrêt Docker échoue. Ne pas poursuivre manuellement après une erreur.
+
+**Windows — PowerShell 5.1 ou ultérieur :**
+
+```powershell
+Set-Location -LiteralPath .\social-link-converter -ErrorAction Stop
+docker compose down --rmi all --volumes
+if ($LASTEXITCODE -ne 0) { throw "Désinstallation Docker incomplète : le dossier est conservé." }
+Set-Location .. -ErrorAction Stop
+Remove-Item -LiteralPath .\social-link-converter -Recurse -Force -ErrorAction Stop
+```
+
+**Périmètre :** Docker lui-même, le dépôt sur GitHub, les autres projets Docker, les images de base partagées et le cache de construction Docker ne sont pas supprimés. Le cache peut conserver des couches de construction ; cette procédure désinstalle l'application, ce n'est pas un effacement sécurisé de toutes les traces sur le disque. Aucun `docker system prune` ni nettoyage global n'est exécuté, afin de ne pas toucher aux autres applications. Si le dossier du projet a été déplacé après le déploiement ou si `-p` a été utilisé, employer le même nom de projet Compose qu'à l'installation (`docker compose -p NOM_DU_PROJET down --rmi all --volumes`).
 
 ## Dépannage
 
